@@ -1,0 +1,169 @@
+print("""\33[1;33;m\t$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+\t$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+
+\t$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+\t$$$$$$$$$$$$$$$$$$$$$ B A N C O  S A T R Y U S $$$$$$$$$$$$$$$$$$$$
+\t$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+
+\t$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+\t$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$\33[m""")
+
+print("""
+\t\t\t\33[1;32mSEJA BEM VINDO(A) AO BANCO SATRYUS!\33[m
+""")
+
+def menu():
+    print( """\n\t\t\t\33[1;36;mSELECIONE A OPÇÃO DESEJADA
+
+\t---------- \tCRIAR CONTA PRESSIONE    \t(c) \t----------
+\t---------- \tCRIAR USUÁRIO PRESSIONE  \t(u) \t----------
+\t---------- \tLISTA CONTA PRESSIONE     \t(l) \t----------
+\t---------- \tPARA DEPÓSITO PRESSIONE  \t(d) \t----------
+\t---------- \tPARA EXTRATO PRESSIONE  \t(e) \t----------
+\t---------- \tPARA RETIRADA PRESSIONE  \t(r) \t----------
+\t---------- \tPARA SAIR PRESSIONE     \t(z)\t----------
+\33[m\n""")
+    menu =  input("\n\tOpção do Cliente:\t")
+    return menu
+
+def depositar(valor, saldo, extrato,/):
+    if valor > 0:
+
+         saldo += valor
+
+         extrato += f"\n\tDeposito em conta de: R$ {valor:.2f}\n"    
+         
+    else:
+
+         print("\n\t\33[1;33;45mTransação falhou, valor inválidol\n\33[m")
+         
+    return saldo, extrato
+
+def retirada(*, saldo, valor, extrato, saque, total_de_saques, limite_de_saques):
+    excedeu_saldo = valor > saldo
+
+    excedeu_saque = valor > saque
+
+    excedeu_limite = total_de_saques  >=  limite_de_saques
+
+    if excedeu_saldo:
+        print("\n\t\33[1;32;41mFalha na transação, valor excede saldo\n\33[m")
+
+    elif excedeu_saque:
+        print("\n\t\33[1;32;41mValor do saque excede limite em conta\n\33[m")
+
+    elif excedeu_limite:
+        print("\n\t\33[1;32;41mExcedeu limite de saque do dia.\n\33[m")
+
+    elif valor > 0:
+        total_de_saques += 1
+        saldo -= valor
+        extrato += f"\n\tSaque R$ {valor:.2f}\n"
+        
+
+    else:
+        print("\n\t\33[1;32;41mFalha na operação, valor inválido.\n\33[m")
+        
+    return saldo, extrato
+
+def mostrar_extrato(saldo, /, *, extratus):
+    print("\n\t$$$$$$$$$$$$$$$$$$$$\33[1;35;m EXTRATO DA CONTA \33[m $$$$$$$$$$$$$$$$$$$$")
+    print("\n\t\33[1;35;44mNenhum registro na conta.\n\33[m"if not extratus else extratus )
+    print(f"\t\33[1;35;44mSaldo :\t R$ {saldo:.2f}\n\33[m")
+
+
+def criar_usuario(usuarios):
+    cpf = input("\n\tDigite o cpf:  ")
+    usuario =  filtrar_usuario(cpf, usuarios)
+    
+    if usuario:
+        print("\n\tUsuário já existe no sistema!")
+        return
+    
+    nome = input("\n\tDigite o nome completo: ")
+    data_nascimento = input("\n\tDigite a data de nascimento (dd-mm-aaaa): ") 
+    endereco = input("\n\tDigite o endereço:  (Rua, numero, bairro, cidade/sigla do estado): ") 
+   
+    usuarios.append({"nome": nome, "data_nascimento":  data_nascimento, "cpf": cpf, "endereco": endereco})   
+    print("\n\tCadastro efetuado com sucesso!")
+    
+    
+def filtrar_usuario(cpf, usuarios):
+    usuarios_filtrados = [usuario for usuario in usuarios if usuario["cpf"] == cpf]
+    return usuarios_filtrados[0] if usuarios_filtrados else None
+    
+    
+    
+def criar_contas(agencia, numero_conta, usuarios):
+    cpf = input("\n\tDigite o cpf:  ")
+    usuario =  filtrar_usuario(cpf, usuarios)
+    
+    if usuario:
+        print("\n\tConta gerada com sucesso!")
+        return {"agencia": agencia, "numero_da_conta": numero_conta, "usuario": usuario}
+        
+    print("\n\tUsuário  inexistente, conta não gerada!")
+    
+def  listar_contas(contas):
+    for conta in contas:
+        linha = f"""
+                \tAgencia:\t{conta["agencia"]}
+                \tConta Corrente:\t{conta["numero_da_conta"]}
+                \tTitular:\t{conta["usuario"]["nome"]}
+        """
+        print("\n\t",linha)
+
+def main():
+    AGENCIA = "0001"
+    LIMITE_SAQUE = 3
+   
+    total_saques = 0
+    extrato = " "
+    saldo = 0
+    saque = 500
+    usuarios = []
+    contas = []
+    numero_contas = 0
+    
+    while True:
+        escolha = menu()
+                
+        if escolha == "d":
+            valor = float(input("\n\t\33[1;33;45mValor a depositar R$:\t\33[m"))
+            saldo, extrato = depositar(valor, saldo, extrato)
+        
+        elif escolha == "r":
+            valor = float(input("\n\t\33[1;32;41mDígite o valor da retirada R$:\t\33[m"))
+            saldo, extrato = retirada(
+                        saldo = saldo,
+                        valor = valor,
+                        extrato = extrato,
+                        saque =  saque,
+                        total_de_saques =  total_saques,
+                        limite_de_saques = LIMITE_SAQUE
+           
+)
+     
+        elif  escolha == "e":
+            mostrar_extrato(saldo, extratus = extrato)
+            
+        elif   escolha ==  "u":
+            criar_usuario(usuarios)
+        
+        elif   escolha ==  "c":
+            numero_contas = len(contas) + 1
+            conta = criar_contas(AGENCIA,  numero_contas, usuarios)
+            
+            if conta:
+                contas.append(conta)
+        
+        elif escolha == "l":
+            listar_contas(contas)
+        
+        elif  escolha == "z":
+            break
+            
+        else:
+            print("\n\t\33[1;31;47mOpção Inválida, digite uma opção válida.\n\33[m")
+            
+main()
